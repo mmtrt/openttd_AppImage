@@ -5,7 +5,9 @@ script:
   # Deploy openttd
   - mkdir -p AppDir/usr/games
   - wget -c "https://cdn.openttd.org/openttd-releases/$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)-linux-generic-amd64.tar.xz" ; tar -xf openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)-linux-generic-amd64.tar.xz -C AppDir/usr/games
+  - ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/ ; ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/AppDir/usr/games/
   - mv AppDir/usr/games/openttd*/* AppDir/usr/games/ ; rmdir AppDir/usr/games/openttd-*-linux-generic-amd64 ; mv AppDir/usr/games/share/applications/openttd.desktop AppDir/usr/games/share/applications/org.openttd.desktop
+  - ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/ ; ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/AppDir/usr/games/
   - cp -R AppDir/usr/games/share AppDir/usr/ ; rm -rf AppDir/usr/games/share
 
 AppDir:
@@ -15,7 +17,7 @@ AppDir:
     id: org.openttd
     name: openttd
     icon: openttd
-    version: !ENV ${OTT_VER}
+    version: "13.0"
     exec: usr/games/openttd
 
   apt:
