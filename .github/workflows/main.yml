@@ -1,0 +1,102 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Set OTT_VER
+      - name: Run version script
+        run: echo "OTT_VER=$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)" >> $GITHUB_ENV
+
+      # Runs a set of commands using the runners shell
+      - name: Build AppImage
+        run: |
+
+          sudo apt-get -y install libfuse2
+          wget -q "https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.0.3/appimage-builder-1.0.3-x86_64.AppImage" -O builder ; chmod +x builder ; ./builder --appimage-extract &>/dev/null
+
+          # add custom mksquashfs
+          wget -q "https://github.com/mmtrt/WINE_AppImage/raw/master/runtime/mksquashfs" -O squashfs-root/usr/bin/mksquashfs
+
+          # force zstd format in appimagebuilder for appimages
+          rm builder ; sed -i 's|xz|zstd|' squashfs-root/usr/lib/python3.8/site-packages/appimagebuilder/modules/prime/appimage_primer.py
+
+          # Add static appimage runtime
+          mkdir -p appimage-build/prime
+          wget -q "https://github.com/mmtrt/WINE_AppImage/raw/master/runtime/runtime-x86_64" -O appimage-build/prime/runtime-x86_64
+
+          ./squashfs-root/AppRun --recipe openttd-stable.yml
+
+      - name: Release
+        uses: marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303
+        with:
+          title: Continuous build
+          automatic_release_tag: continuous
+          prerelease: false
+          draft: false
+          files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-x86_64.AppImage
+          repo_token: ${{ secrets.PATN }}
+
+  # This workflow contains a single job called "build"
+  Build-aarch64:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Set OTT_VER
+      - name: Run version script
+        run: echo "OTT_VER=$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)" >> $GITHUB_ENV
+
+      # Runs a set of commands using the runners shell
+      - name: Build AppImage
+        run: |
+
+          sudo apt-get -y install libfuse2
+          wget -q "https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.0.3/appimage-builder-1.0.3-x86_64.AppImage" -O builder ; chmod +x builder ; ./builder --appimage-extract &>/dev/null
+
+          # add custom mksquashfs
+          wget -q "https://github.com/mmtrt/WINE_AppImage/raw/master/runtime/mksquashfs" -O squashfs-root/usr/bin/mksquashfs
+
+          # force zstd format in appimagebuilder for appimages
+          rm builder ; sed -i 's|xz|zstd|' squashfs-root/usr/lib/python3.8/site-packages/appimagebuilder/modules/prime/appimage_primer.py
+
+          # Add static appimage runtime
+          mkdir -p appimage-build/prime
+          wget -q "https://github.com/mmtrt/WINE_AppImage/raw/master/runtime/runtime-aarch64" -O appimage-build/prime/runtime-aarch64
+
+          ./squashfs-root/AppRun --recipe openttd-stable-box86.yml
+
+      - name: Release
+        uses: marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303
+        with:
+          title: Continuous build
+          automatic_release_tag: continuous
+          prerelease: false
+          draft: false
+          files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-aarch64.AppImage
+          repo_token: ${{ secrets.PATN }}

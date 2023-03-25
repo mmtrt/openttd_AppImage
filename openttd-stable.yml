@@ -1,0 +1,39 @@
+version: 1
+script:
+  # Remove any previous build
+  - rm -rf AppDir || true
+  # Deploy openttd
+  - mkdir -p AppDir/usr/games
+  - wget -c "https://cdn.openttd.org/openttd-releases/$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)-linux-generic-amd64.tar.xz" ; tar -xf openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)-linux-generic-amd64.tar.xz -C AppDir/usr/games
+  - mv AppDir/usr/games/openttd*/* AppDir/usr/games/ ; rmdir AppDir/usr/games/openttd-*-linux-generic-amd64 ; mv AppDir/usr/games/share/applications/openttd.desktop AppDir/usr/games/share/applications/org.openttd.desktop
+  - cp -R AppDir/usr/games/share AppDir/usr/ ; rm -rf AppDir/usr/games/share
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: org.openttd
+    name: openttd
+    icon: openttd
+    version: !ENV ${OTT_VER}
+    exec: usr/games/openttd
+
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - libc6
+
+  runtime:
+    path_mappings:
+      - /usr/share/games/openttd:$APPDIR/usr/share/games/openttd
+
+AppImage:
+  update-information: "gh-releases-zsync|mmtrt|openttd_AppImage|stable|openttd*x86_64.AppImage.zsync"
+  sign-key: None
+  arch: x86_64 

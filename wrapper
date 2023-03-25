@@ -1,0 +1,131 @@
+# APP env
+progName="openttd"
+progArch="-aarch64"
+progVer=
+progRealPath="$APPDIR/usr/share/$progName"
+progHome="$HOME/.$progName"
+progBin="$progName.exe"
+progIcoD="$HOME/.local/share/applications/$progName.desktop"
+
+if [ -d "$APPDIR/winedata/.wine" ]; then
+# env used by unionfs-fuse
+# WINEPREFIX in the AppDir
+RO_WINEPREFIX="$APPDIR/winedata/.wine"
+RW_WINEPREFIX="$progHome/.wine"
+MNT_WINEPREFIX=/tmp/."${progName}".unionfs
+else
+# WINE env
+export WINEARCH=${WINEARCH:-"win32"}
+export WINEPREFIX=${WINEPREFIX:-"$progHome/.wine"}
+export WINEDLLOVERRIDES=${WINEDLLOVERRIDES:-"mscoree,mshtml="}
+export WINEDEBUG=${WINEDEBUG:-"fixme-all"}
+fi
+export WINELOADER=${WINELOADER:-"$APPDIR/opt/wine-stable/bin/wine"}
+
+# DXVK env
+export DXVK_HUD=${DXVK_HUD:-"0"}
+export DXVK_LOG_LEVEL=${DXVK_LOG_LEVEL:-"none"}
+export DXVK_STATE_CACHE=${DXVK_STATE_CACHE:-"0"}
+export DXVK_CONFIG_FILE=${DXVK_CONFIG_FILE:-"$progHome/dxvk.conf"}
+
+if [ ! -d "$progHome" ];then
+  mkdir -p "$progHome"
+fi
+
+# Delete broken symlinks
+find -L "$progHome/" -maxdepth 2 -type l -delete &>/dev/null
+# Update existing symlinks, add new symlinks
+cp -urs "$progRealPath/"* "$progHome" &>/dev/null
+
+# Load bundled WINEPREFIX if existing and if $WINEPREFIX is not set
+if [ -d "$APPDIR/winedata/.wine" ] && [ -z "$WINEPREFIX" ] ; then
+  mkdir -p "$MNT_WINEPREFIX" "$RW_WINEPREFIX"
+  if [ ! -e "$MNT_WINEPREFIX/drive_c" ] ; then
+    unionfs-fuse -o use_ino,uid=$UID -ocow "$RW_WINEPREFIX"=RW:"$RO_WINEPREFIX"=RO "$MNT_WINEPREFIX" || exit 1
+    trap atexit EXIT
+  fi
+  export WINEPREFIX="$MNT_WINEPREFIX" WINEDLLOVERRIDES="mscoree,mshtml=" WINEDEBUG=fixme-all WINEARCH="win32"
+elif [ ! -d "$APPDIR/winedata/.wine" ] && [ ! -d "$WINEPREFIX" ]; then
+# copy WINE light blue theme to WINEPREFIX
+# $WINELOADER wineboot -i
+mkdir -p "$WINEPREFIX/drive_c/windows"
+cp -R "$APPDIR/winedata/"* "$WINEPREFIX/drive_c/windows"
+fi
+
+dkico() {
+if [[ ! -f $progIcoD ]]; then
+
+cp -r "$APPDIR"/usr/share/icons "$HOME"/.local/share
+mkdir -p "$HOME/.local/share/applications"
+DesktopFilePath="$HOME/.local/share/applications/$progName.desktop"
+
+{
+echo "[Desktop Entry]
+Type=Application
+Name=$progName
+GenericName=OpenTTD
+Comment=A simulation game based on Transport Tycoon Deluxe
+Encoding=UTF-8
+Version=$progVer
+Icon=$progName
+Exec=${OWD}/${progName}-${progVer}${progArch}.AppImage %F
+Terminal=false
+StartupWMClass=$progBin
+} >> "$DesktopFilePath"
+fi
+}
+
+rmdkico() {
+
+if [[ -f "$HOME/.local/share/applications/$progName.desktop" ]]; then
+  rm "$HOME/.local/share/applications/$progName.desktop"
+fi
+
+if [[ -f "$HOME/.local/share/kservices5/ServiceMenus/${progName}_enqueue.desktop" ]]; then
+  rm "$HOME/.local/share/kservices5/ServiceMenus/${progName}_enqueue.desktop"
+fi
+
+for width in 16 22 24 32 36 42 48 64 72 96 128 192 256; do
+    if [[ -f "$HOME"/.local/share/icons/hicolor/${width}x${width}/apps/$progName.png ]]; then
+      rm "$HOME"/.local/share/icons/hicolor/${width}x${width}/apps/$progName.png
+    fi
+done
+
+}
+
+atexit ()
+{
+  while pgrep -f "$progHome/$progBin" ; do sleep 1 ; done
+  kill $(ps -ef | grep $progName.unionfs | awk '{print $2}' | head -1)
+  sleep 1
+  rm -r "$MNT_WINEPREFIX" # "$RW_WINEPREFIX_OVERLAY"
+}
+
+# Passing args to wine apps
+for i in "$@"; do
+  if [[ -e "${i}" ]]; then
+    args+=( "$("$APPDIR"/opt/wine-stable/bin/winepath -w "$i")" )
+  else
+    args+=( "$i" )
+  fi
+done
+
+# Launch wineboot/winecfg/winetricks if requested.
+# If the executable exists then launch it.
+case "$1" in
+  "install")
+    dkico
+    ;;
+  "remove")
+    rmdkico
+    ;;
+  "winetricks")
+    for i in "${@:2}" ; do winetricks -q -f "$i" ; done
+    ;;
+  "msiexec"|"notepad"|"regedit"|"regsvr32"|"wineboot"|"winecfg"|"wineconsole"|"winedbg"|"winefile"|"winemine"|"winepath")
+    "$APPDIR/usr/local/bin/box86" "$WINELOADER" "$1"
+    ;;
+  *)
+    "$APPDIR/usr/local/bin/box86" "$WINELOADER" "$progHome/$progBin" "${args[@]}" 2>/dev/null
+    ;;
+esac
