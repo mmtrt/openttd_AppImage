@@ -48,8 +48,7 @@ if [ -d "$APPDIR/winedata/.wine" ] && [ -z "$WINEPREFIX" ] ; then
 elif [ ! -d "$APPDIR/winedata/.wine" ] && [ ! -d "$WINEPREFIX" ]; then
 # copy WINE light blue theme to WINEPREFIX
 # $WINELOADER wineboot -i
-mkdir -p "$WINEPREFIX/drive_c/windows"
-cp -R "$APPDIR/winedata/"* "$WINEPREFIX/drive_c/windows"
+cp -R "$APPDIR/usr/games/"* "$progHome"
 fi
 
 dkico() {
@@ -70,7 +69,7 @@ Version=$progVer
 Icon=$progName
 Exec=${OWD}/${progName}-${progVer}${progArch}.AppImage %F
 Terminal=false
-StartupWMClass=$progBin
+StartupWMClass=$progBin"
 } >> "$DesktopFilePath"
 fi
 }
