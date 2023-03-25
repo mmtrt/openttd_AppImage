@@ -1,0 +1,1 @@
+# openttd_AppImage
