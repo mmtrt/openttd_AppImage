@@ -63,7 +63,6 @@ AppDir:
       - libmpg123-0:armhf
       - libxxf86vm1:armhf
       - libdrm2:armhf
-      - libdrm-intel1:armhf
       - libdrm-nouveau2:armhf
       - libdrm-amdgpu1:armhf
       - libdrm-radeon1:armhf
