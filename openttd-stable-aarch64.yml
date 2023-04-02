@@ -11,7 +11,7 @@ AppDir:
     id: org.openttd
     name: openttd
     icon: openttd
-    version: "13.0"
+    version: !ENV ${OTTA_VER}
     exec: usr/games/openttd
 
   apt:
@@ -28,14 +28,14 @@ AppDir:
   after_bundle:
     # this is executed after the packages and files are added
     - |
-     OTT_VER="$(wget -qO- http://ports.ubuntu.com/pool/universe/o/openttd | grep -Eo ttd.*deb | grep arm64 | sed -r 's|_| |g' | tail -1 | awk '{print $2}')"
-     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd/openttd_${OTT_VER}_arm64.deb
-     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd/openttd-data_${OTT_VER}_all.deb
+     OTTA_VER="$(wget -qO- http://ports.ubuntu.com/pool/universe/o/openttd | grep -Eo ttd.*deb | grep arm64 | sed -r 's|_| |g' | tail -1 | awk '{print $2}')"
+     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd/openttd_${OTTA_VER}_arm64.deb
+     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd/openttd-data_${OTTA_VER}_all.deb
      wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd-openmsx/openttd-openmsx_0.4.2-1_all.deb
      wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd-opengfx/openttd-opengfx_7.1-1_all.deb
      wget -q -c http://launchpadlibrarian.net/581965460/openttd-opensfx_1.0.3-2_all.deb
-     dpkg -x "openttd_${OTT_VER}_arm64.deb" AppDir/
-     dpkg -x "openttd-data_${OTT_VER}_all.deb" AppDir/
+     dpkg -x "openttd_${OTTA_VER}_arm64.deb" AppDir/
+     dpkg -x "openttd-data_${OTTA_VER}_all.deb" AppDir/
      dpkg -x "openttd-openmsx_0.4.2-1_all.deb" AppDir/
      dpkg -x "openttd-opengfx_7.1-1_all.deb" AppDir/
      dpkg -x "openttd-opensfx_1.0.3-2_all.deb" AppDir/
