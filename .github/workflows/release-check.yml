@@ -14,7 +14,7 @@ jobs:
         token: ${{ secrets.PATN }}
     - name: get-latest-version
       run: |
-        VERSION="$(wget -qO- "https://github.com/dotnet/runtime/tags" | grep -Eo /v7.* | sed 's|"| |;s|/v||g' | head -1 | awk '{print $1}')"
+        VERSION="$(wget -qO- http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd | grep -Eo ttd.*deb | grep amd64 | sed -r 's|_| |g;s|-| |' | tail -1 | awk '{print $2}')"
         last=$(tail -n1 .build | awk '{print $4}')
 
         if [ "$last" != "$VERSION" ]; then
