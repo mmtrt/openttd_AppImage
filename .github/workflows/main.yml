@@ -55,7 +55,7 @@ jobs:
           automatic_release_tag: stable
           prerelease: false
           draft: false
-          files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-x86_64.AppImage
+          files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-x86_64.AppImage*
           repo_token: ${{ secrets.PATN }}
 
   # This workflow contains a single job called "build"
@@ -98,5 +98,5 @@ jobs:
           automatic_release_tag: stable-aarch64
           prerelease: false
           draft: false
-          files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-aarch64.AppImage
+          files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-aarch64.AppImage*
           repo_token: ${{ secrets.PATN }}
