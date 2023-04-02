@@ -1,0 +1,55 @@
+version: 1
+
+script:
+  # Remove any previous build
+  - rm -rf AppDir || true
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: org.openttd
+    name: openttd
+    icon: openttd
+    version: "13.0"
+    exec: usr/games/openttd
+
+  apt:
+    arch: [arm64]
+    sources:
+      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ lunar main restricted universe multiverse'
+      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ lunar-updates main restricted universe multiverse'
+      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ lunar-backports main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
+
+    include:
+      - libc6
+
+  after_bundle:
+    # this is executed after the packages and files are added
+    - |
+     OTT_VER="$(wget -qO- http://ports.ubuntu.com/pool/universe/o/openttd | grep -Eo ttd.*deb | grep arm64 | sed -r 's|_| |g' | tail -1 | awk '{print $2}')"
+     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd/openttd_${OTT_VER}_arm64.deb
+     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd/openttd-data_${OTT_VER}_all.deb
+     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd-openmsx/openttd-openmsx_0.4.2-1_all.deb
+     wget -q -c http://ports.ubuntu.com/pool/universe/o/openttd-opengfx/openttd-opengfx_7.1-1_all.deb
+     wget -q -c http://launchpadlibrarian.net/581965460/openttd-opensfx_1.0.3-2_all.deb
+     dpkg -x "openttd_${OTT_VER}_arm64.deb" AppDir/
+     dpkg -x "openttd-data_${OTT_VER}_all.deb" AppDir/
+     dpkg -x "openttd-openmsx_0.4.2-1_all.deb" AppDir/
+     dpkg -x "openttd-opengfx_7.1-1_all.deb" AppDir/
+     dpkg -x "openttd-opensfx_1.0.3-2_all.deb" AppDir/
+
+     # Cleanup
+     rm -rf AppDir/usr/share/{applications,man,doc,lintian}
+
+  runtime:
+    path_mappings:
+      - /usr/share/games/openttd:$APPDIR/usr/share/games/openttd
+    env:
+      APPDIR_LIBC_VERSION: '2.37'
+
+AppImage:
+  update-information: "gh-releases-zsync|mmtrt|openttd_AppImage|stable-aarch64|openttd*aarch64.AppImage.zsync"
+  #sign-key: None
+  arch: aarch64
