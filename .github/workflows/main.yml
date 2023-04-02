@@ -27,7 +27,7 @@ jobs:
 
       # Set OTT_VER
       - name: Run version script
-        run: echo "OTT_VER=$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)" >> $GITHUB_ENV
+        run: echo "OTT_VER=$(wget -qO- http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd | grep -Eo ttd.*deb | grep amd64 | sed -r 's|_| |g;s|-| |' | tail -1 | awk '{print $2}')" >> $GITHUB_ENV
 
       # Runs a set of commands using the runners shell
       - name: Build AppImage
@@ -70,7 +70,7 @@ jobs:
 
       # Set OTT_VER
       - name: Run version script
-        run: echo "OTT_VER=$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)" >> $GITHUB_ENV
+        run: echo "OTT_VER=$(wget -qO- http://ports.ubuntu.com/pool/universe/o/openttd | grep -Eo ttd.*deb | grep arm64 | sed -r 's|_| |g;s|-| |' | tail -1 | awk '{print $2}')" >> $GITHUB_ENV
 
       # Runs a set of commands using the runners shell
       - name: Build AppImage
