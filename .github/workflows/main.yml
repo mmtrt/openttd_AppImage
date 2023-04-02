@@ -89,13 +89,13 @@ jobs:
           mkdir -p appimage-build/prime
           wget -q "https://github.com/mmtrt/WINE_AppImage/raw/master/runtime/runtime-aarch64" -O appimage-build/prime/runtime-aarch64
 
-          ./squashfs-root/AppRun --recipe openttd-stable-box86.yml
+          ./squashfs-root/AppRun --recipe openttd-stable-aarch64.yml
 
       - name: Release
         uses: marvinpinto/action-automatic-releases@6273874b61ebc8c71f1a61b2d98e234cf389b303
         with:
-          title: OpenTTD stable box86
-          automatic_release_tag: stable-box86
+          title: OpenTTD stable aarch64
+          automatic_release_tag: stable-aarch64
           prerelease: false
           draft: false
           files: /home/runner/work/openttd_AppImage/openttd_AppImage/openttd-*-aarch64.AppImage
