@@ -1,14 +1,8 @@
 version: 1
+
 script:
   # Remove any previous build
   - rm -rf AppDir || true
-  # Deploy openttd
-  - mkdir -p AppDir/usr/games
-  - wget -c "https://cdn.openttd.org/openttd-releases/$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)/openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)-linux-generic-amd64.tar.xz" ; tar -xf openttd-$(wget -qO- "https://www.openttd.org" | grep -Eo Download.* | sed 's|(| |g;s|)| |g' | awk '{print $3}' | head -1)-linux-generic-amd64.tar.xz -C AppDir/usr/games
-  - ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/ ; ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/AppDir/usr/games/
-  - mv AppDir/usr/games/openttd*/* AppDir/usr/games/ ; rmdir AppDir/usr/games/openttd-*-linux-generic-amd64 ; mv AppDir/usr/games/share/applications/openttd.desktop AppDir/usr/games/share/applications/org.openttd.desktop
-  - ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/ ; ls -al /home/runner/work/openttd_AppImage/openttd_AppImage/AppDir/usr/games/
-  - cp -R AppDir/usr/games/share AppDir/usr/ ; rm -rf AppDir/usr/games/share
 
 AppDir:
   path: ./AppDir
@@ -23,17 +17,37 @@ AppDir:
   apt:
     arch: amd64
     sources:
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ lunar main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ lunar-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ lunar-security main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
       - libc6
 
+  after_bundle:
+    # this is executed after the packages and files are added
+    - |
+     OTT_VER="$(wget -qO- http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd | grep -Eo ttd.*deb | grep amd64 | sed -r 's|_| |g' | tail -1 | awk '{print $2}')"
+     wget -q -c http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd/openttd_${OTT_VER}_amd64.deb
+     wget -q -c http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd/openttd-data_${OTT_VER}_all.deb
+     wget -q -c http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd-openmsx/openttd-openmsx_0.4.2-1_all.deb
+     wget -q -c http://us.archive.ubuntu.com/ubuntu/ubuntu/pool/universe/o/openttd-opengfx/openttd-opengfx_7.1-1_all.deb
+     wget -q -c http://launchpadlibrarian.net/581965460/openttd-opensfx_1.0.3-2_all.deb
+     dpkg -x "openttd_${OTT_VER}_amd64.deb" AppDir/
+     dpkg -x "openttd-data_${OTT_VER}_all.deb" AppDir/
+     dpkg -x "openttd-openmsx_0.4.2-1_all.deb" AppDir/
+     dpkg -x "openttd-opengfx_7.1-1_all.deb" AppDir/
+     dpkg -x "openttd-opensfx_1.0.3-2_all.deb" AppDir/
+
+     # Cleanup
+     rm -rf AppDir/usr/share/{applications,man,doc,lintian}
+
   runtime:
     path_mappings:
       - /usr/share/games/openttd:$APPDIR/usr/share/games/openttd
+    env:
+      APPDIR_LIBC_VERSION: '2.37'
 
 AppImage:
   update-information: "gh-releases-zsync|mmtrt|openttd_AppImage|stable|openttd*x86_64.AppImage.zsync"
