@@ -17,9 +17,9 @@ AppDir:
   apt:
     arch: [arm64]
     sources:
-      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ lunar main restricted universe multiverse'
-      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ lunar-updates main restricted universe multiverse'
-      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ lunar-backports main restricted universe multiverse'
+      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ noble main restricted universe multiverse'
+      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ noble-updates main restricted universe multiverse'
+      - sourceline: 'deb http://ports.ubuntu.com/ubuntu-ports/ noble-backports main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
 
     include:
@@ -47,7 +47,7 @@ AppDir:
     path_mappings:
       - /usr/share/games/openttd:$APPDIR/usr/share/games/openttd
     env:
-      APPDIR_LIBC_VERSION: '2.37'
+      APPDIR_LIBC_VERSION: '2.38'
 
 AppImage:
   update-information: "gh-releases-zsync|mmtrt|openttd_AppImage|stable-aarch64|openttd*aarch64.AppImage.zsync"

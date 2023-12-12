@@ -17,9 +17,9 @@ AppDir:
   apt:
     arch: amd64
     sources:
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ lunar main restricted universe multiverse'
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ lunar-updates main restricted universe multiverse'
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ lunar-security main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
 
     include:
@@ -47,7 +47,7 @@ AppDir:
     path_mappings:
       - /usr/share/games/openttd:$APPDIR/usr/share/games/openttd
     env:
-      APPDIR_LIBC_VERSION: '2.37'
+      APPDIR_LIBC_VERSION: '2.38'
 
 AppImage:
   update-information: "gh-releases-zsync|mmtrt|openttd_AppImage|stable|openttd*x86_64.AppImage.zsync"
